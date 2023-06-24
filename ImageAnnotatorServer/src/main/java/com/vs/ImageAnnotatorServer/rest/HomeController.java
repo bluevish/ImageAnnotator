@@ -1,4 +1,4 @@
-package com.vs.ImageAnnotatorServer.controller;
+package com.vs.ImageAnnotatorServer.rest;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
