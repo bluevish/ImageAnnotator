@@ -1,4 +1,4 @@
-package com.vs.ImageAnnotatorServer.auth;
+package com.vs.ImageAnnotatorServer.config;
 
 
 import com.nimbusds.jose.JOSEException;
@@ -13,16 +13,17 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,6 +35,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +45,11 @@ public class AuthConfig {
     @Bean
     @Order(SecurityProperties.BASIC_AUTH_ORDER)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().authenticated();
+        http
+           .authorizeHttpRequests()
+           .antMatchers("/admin/**").hasRole(USER_ROLE.ADMIN.toString())
+           .anyRequest()
+           .authenticated();
         http.csrf(csrf -> csrf.disable());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.httpBasic();
@@ -66,15 +72,7 @@ public class AuthConfig {
 
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource){
-        UserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
-        UserDetails user = User
-                .withUsername("test")
-                .password("password")
-                .passwordEncoder(password -> passwordEncoder().encode(password))
-                .roles("USER")
-                .build();
-        userDetailsManager.createUser(user);
-        return userDetailsManager;
+        return new JdbcUserDetailsManager(dataSource);
     }
 
     @Bean
@@ -120,6 +118,20 @@ public class AuthConfig {
     @Bean
     public JwtEncoder encoder(JWKSource jwkSource){
         return new NimbusJwtEncoder(jwkSource);
+    }
+
+    @Bean
+    public Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter(){
+        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
+        converter.setAuthorityPrefix("");
+        return converter;
+    }
+
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter(Converter<Jwt, Collection<GrantedAuthority>> jwtGrantedAuthoritiesConverter){
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
     }
 
 
