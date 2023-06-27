@@ -1,40 +1,64 @@
-package com.vs.ImageAnnotatorServer.entities;
+package com.vs.ImageAnnotatorServer.auth;
 
 
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
-@Table
-public class User {
+@Table(name="users")
+public class User implements UserDetails{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
-    @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private long id;
 
-    @Column(name="user_name", length = 50, unique = true)
-    @Size(min = 6, max = 50)
-    @NotNull
-    private String username;
 
-    @Column(name="email", unique = true)
+    @Column(unique = true)
     @NotNull
     private String email;
 
-    @Column(name="password")
-    @Size(min = 6, max = 18)
+    @Column(name="first_name")
     @NotNull
+    private String firstName;
+
+    @Column(name="last_name")
+    @NotNull
+    private String lastName;
+
+    @Column
+    @NotNull
+    @JsonIgnore
     private String password;
 
-    @Column(name="role")
-    @NotNull
-    private String role;
 
+    @Column
+    @NotNull
+    private boolean enabled;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name="user_id", nullable = false)
+    private Set<Authority> authorities;
+
+    public User(){}
+
+    public User(@NotNull String email, @NotNull String password, @NotNull String firstName, @NotNull String lastName) {
+        this.email = email;
+        this.password = password;
+        this.firstName= firstName;
+        this.lastName = lastName;
+        this.enabled = true;
+        this.authorities = new HashSet<>();
+    }
 
     public long getId() {
         return id;
@@ -44,13 +68,11 @@ public class User {
         this.id = id;
     }
 
+    @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
-    public void setUsername(String userName) {
-        this.username = userName;
-    }
 
     public String getEmail() {
         return email;
@@ -68,11 +90,89 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
-        return role;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void addAuthority(Authority authority){
+        this.authorities.add(authority);
+    }
+
+    public void addRole(String role){
+        Authority authority = new Authority("ROLE_" + role);
+        this.authorities.add(authority);
+    }
+
+    public void addAuthority(String authority){
+        Authority auth = new Authority(authority);
+        this.authorities.add(auth);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            return this.email.equals(((User) obj).email);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.email.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", password=' [Protected]" + '\'' +
+                ", enabled=" + enabled +
+                ", authorities=" + authorities +
+                '}';
     }
 }

@@ -1,53 +1,38 @@
-package com.vs.ImageAnnotatorServer.rest;
+package com.vs.ImageAnnotatorServer.auth;
 
+import com.vs.ImageAnnotatorServer.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.stream.Collectors;
 
+
+// TODO Proper error handling, check for security smells and follow best practices
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
-    private JwtEncoder jwtEncoder;
+    private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<RestResponse> login(Authentication authentication){
+    public ResponseEntity<RestResponse> login(@RequestBody AuthRequest request){
         RestResponse restResponse = new RestResponse(HttpStatus.OK.value(), "Authentication Token");
-        restResponse.addData("token",createToken(authentication));
-        return new ResponseEntity<>(restResponse, HttpStatus.OK);
+        restResponse.addData("token", authService.loginAndGetToken(request));
+        return ResponseEntity.ok(restResponse);
     }
 
-    private String createToken(Authentication authentication) {
-        JwtClaimsSet claims = JwtClaimsSet
-                .builder()
-                .issuer("SELF")
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(60*15))
-                .subject(authentication.getName())
-                .claim("scope", createScopes(authentication))
-                .build();
-        return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
-
+    @PostMapping("/register")
+    public ResponseEntity<RestResponse> register(@RequestBody AuthRequest request){
+        RestResponse restResponse = new RestResponse(HttpStatus.OK.value(), "Authentication Token");
+        restResponse.addData("token", authService.registerAndGetToken(request));
+        return ResponseEntity.ok(restResponse);
     }
 
-    private List<String> createScopes(Authentication authentication) {
-        return authentication
-                .getAuthorities()
-                .stream()
-                .map(authority -> authority.getAuthority())
-                .collect(Collectors.toList());
-    }
+
 
 }

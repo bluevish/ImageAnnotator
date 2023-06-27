@@ -1,5 +1,5 @@
 package com.vs.ImageAnnotatorServer.auth;
 
-public enum USER_ROLE {
+public enum UserAuthority {
     ROLE_USER,ROLE_ADMIN
 }

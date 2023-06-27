@@ -2,7 +2,7 @@ package com.vs.ImageAnnotatorServer.auth;
 
 import java.util.List;
 
-public class RegisterRequest {
+public class AuthRequest {
 
     private String email;
     private String password;
@@ -10,7 +10,7 @@ public class RegisterRequest {
     private String lastName;
     private List<String> roles;
 
-    public RegisterRequest() {
+    public AuthRequest() {
     }
 
     public String getEmail() {
