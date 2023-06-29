@@ -1,4 +1,6 @@
-package com.vs.ImageAnnotatorServer.utils.helper;
+package com.vs.ImageAnnotatorServer.utils.validation;
+
+import com.vs.ImageAnnotatorServer.utils.helper.Logger;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

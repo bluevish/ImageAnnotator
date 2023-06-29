@@ -1,6 +1,6 @@
 package com.vs.ImageAnnotatorServer.auth;
 
-import com.vs.ImageAnnotatorServer.exception.UserCreationException;
+import com.vs.ImageAnnotatorServer.utils.exception.UserCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,13 +9,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.validation.constraints.NotNull;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -41,7 +35,7 @@ public class UserService implements UserDetailsService {
 
     public void createUser(String email, String password, String firstName, String lastName, List<String> roles, PasswordEncoder encoder) throws UserCreationException {
         try{
-            if(password==null || (password.length() >= 6 && password.length() <= 15)) {
+            if(password==null || (password.length() < 6 || password.length() > 15)) {
                 throw new UserCreationException("Password must be 6 to 15 characters long!");
             }
             User user = new User(email, encoder.encode(password), firstName, lastName);

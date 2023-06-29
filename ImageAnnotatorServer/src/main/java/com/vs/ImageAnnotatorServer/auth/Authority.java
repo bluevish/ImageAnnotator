@@ -1,6 +1,6 @@
 package com.vs.ImageAnnotatorServer.auth;
 
-import com.vs.ImageAnnotatorServer.utils.helper.EnumeratedValue;
+import com.vs.ImageAnnotatorServer.utils.validation.EnumeratedValue;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;

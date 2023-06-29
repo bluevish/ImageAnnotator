@@ -1,4 +1,4 @@
-package com.vs.ImageAnnotatorServer.exception;
+package com.vs.ImageAnnotatorServer.utils.exception;
 
 public class UserCreationException extends Exception{
 
