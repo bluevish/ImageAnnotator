@@ -1,5 +1,6 @@
 package com.vs.ImageAnnotatorServer.auth;
 
+import com.vs.ImageAnnotatorServer.exception.UserCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,8 +39,8 @@ public class AuthService {
         return createToken(authentication);
     }
 
-    public String registerAndGetToken(AuthRequest request){
-        userService.createUser(request.getEmail(), passwordEncoder.encode(request.getPassword()), request.getFirstName(), request.getLastName(), request.getRoles());
+    public String registerAndGetToken(AuthRequest request) throws UserCreationException {
+        userService.createUser(request.getEmail(), request.getPassword(), request.getFirstName(), request.getLastName(), request.getRoles(), passwordEncoder);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         return createToken(authentication);
     }

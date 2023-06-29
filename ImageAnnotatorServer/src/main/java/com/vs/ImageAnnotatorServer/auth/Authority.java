@@ -1,10 +1,12 @@
 package com.vs.ImageAnnotatorServer.auth;
 
+import com.vs.ImageAnnotatorServer.utils.helper.EnumeratedValue;
 import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+// TODO : Check if authorities can be validated at the same time as User while persisting in DB
 @Entity
 @Table(name="authorities")
 public class Authority implements GrantedAuthority{
@@ -14,25 +16,25 @@ public class Authority implements GrantedAuthority{
     @Column
     private long id;
 
-
     @Column(name="authority")
     @NotNull
-    @Enumerated(EnumType.STRING)
-    private UserAuthority authority;
+    @EnumeratedValue(enumClass = UserAuthority.class)
+    private String authority;
 
     public Authority() {
+
     }
 
-    public Authority(@NotNull String authority) {
-        this.authority = UserAuthority.valueOf(authority);
+    public Authority(String authority) {
+        this.authority = authority;
     }
 
     public String getAuthority() {
-        return authority.name();
+        return authority;
     }
 
     public void setAuthority(String authority) {
-        this.authority = UserAuthority.valueOf(authority);
+        this.authority = authority;
     }
 
     public long getId() {
@@ -61,6 +63,6 @@ public class Authority implements GrantedAuthority{
 
     @Override
     public String toString() {
-        return this.authority.name();
+        return this.authority;
     }
 }

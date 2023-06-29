@@ -4,14 +4,15 @@ package com.vs.ImageAnnotatorServer.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.util.Assert;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 @Entity
 @Table(name="users")
@@ -25,18 +26,23 @@ public class User implements UserDetails{
 
     @Column(unique = true)
     @NotNull
+    @NotBlank
+    @Email
     private String email;
 
     @Column(name="first_name")
     @NotNull
+    @NotBlank
     private String firstName;
 
     @Column(name="last_name")
     @NotNull
+    @NotBlank
     private String lastName;
 
     @Column
     @NotNull
+    @NotBlank
     @JsonIgnore
     private String password;
 
@@ -47,6 +53,8 @@ public class User implements UserDetails{
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name="user_id", nullable = false)
+    @NotEmpty
+    @NotNull
     private Set<Authority> authorities;
 
     public User(){}
@@ -119,6 +127,7 @@ public class User implements UserDetails{
         Authority authority = new Authority("ROLE_" + role);
         this.authorities.add(authority);
     }
+
 
     public void addAuthority(String authority){
         Authority auth = new Authority(authority);

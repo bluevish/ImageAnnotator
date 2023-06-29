@@ -1,5 +1,6 @@
 package com.vs.ImageAnnotatorServer.auth;
 
+import com.vs.ImageAnnotatorServer.exception.UserCreationException;
 import com.vs.ImageAnnotatorServer.rest.RestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RestResponse> register(@RequestBody AuthRequest request){
+    public ResponseEntity<RestResponse> register(@RequestBody AuthRequest request) throws UserCreationException {
         RestResponse restResponse = new RestResponse(HttpStatus.OK.value(), "Authentication Token");
         restResponse.addData("token", authService.registerAndGetToken(request));
         return ResponseEntity.ok(restResponse);
